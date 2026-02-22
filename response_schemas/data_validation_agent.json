@@ -15,8 +15,6 @@
         "email": "string",
         "course": "string",
         "date": "string",
-        "score": "string",
-        "instructor": "string",
         "status": "string",
         "issues": ["string"]
       }

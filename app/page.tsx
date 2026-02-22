@@ -29,8 +29,6 @@ interface ValidationRow {
   email: string
   course: string
   date: string
-  score: string
-  instructor: string
   status: string
   issues: string[]
 }
@@ -47,8 +45,6 @@ interface CertificateEntry {
   email: string
   course: string
   date: string
-  score: string
-  instructor: string
   status: string
   certificate_id: string
   error_message: string
@@ -153,13 +149,13 @@ function renderMarkdown(text: string) {
 }
 
 // ─── Sample Data ─────────────────────────────────────────────────────────────
-const SAMPLE_CSV_HEADERS = ['Name', 'Email', 'Course', 'Date', 'Score', 'Instructor']
+const SAMPLE_CSV_HEADERS = ['Name', 'Email', 'Course', 'Date']
 const SAMPLE_CSV_ROWS: Record<string, string>[] = [
-  { Name: 'Alice Johnson', Email: 'alice@example.com', Course: 'Advanced React', Date: '2025-01-15', Score: '95', Instructor: 'Dr. Smith' },
-  { Name: 'Bob Williams', Email: 'bob@example.com', Course: 'Advanced React', Date: '2025-01-15', Score: '88', Instructor: 'Dr. Smith' },
-  { Name: 'Carol Davis', Email: 'carol@example.com', Course: 'Data Science Fundamentals', Date: '2025-01-20', Score: '92', Instructor: 'Prof. Lee' },
-  { Name: 'David Chen', Email: 'david@example.com', Course: 'Data Science Fundamentals', Date: '2025-01-20', Score: '78', Instructor: 'Prof. Lee' },
-  { Name: 'Eve Martinez', Email: 'invalid-email', Course: 'Cloud Architecture', Date: '2025-01-25', Score: '105', Instructor: 'Dr. Patel' },
+  { Name: 'Alice Johnson', Email: 'alice@example.com', Course: 'Advanced React', Date: '2025-01-15' },
+  { Name: 'Bob Williams', Email: 'bob@example.com', Course: 'Advanced React', Date: '2025-01-15' },
+  { Name: 'Carol Davis', Email: 'carol@example.com', Course: 'Data Science Fundamentals', Date: '2025-01-20' },
+  { Name: 'David Chen', Email: 'david@example.com', Course: 'Data Science Fundamentals', Date: '2025-01-20' },
+  { Name: 'Eve Martinez', Email: 'invalid-email', Course: 'Cloud Architecture', Date: '2025-01-25' },
 ]
 
 const SAMPLE_VALIDATION: ValidationResult = {
@@ -167,11 +163,11 @@ const SAMPLE_VALIDATION: ValidationResult = {
   valid_count: 4,
   invalid_count: 1,
   rows: [
-    { row_number: 1, name: 'Alice Johnson', email: 'alice@example.com', course: 'Advanced React', date: '2025-01-15', score: '95', instructor: 'Dr. Smith', status: 'valid', issues: [] },
-    { row_number: 2, name: 'Bob Williams', email: 'bob@example.com', course: 'Advanced React', date: '2025-01-15', score: '88', instructor: 'Dr. Smith', status: 'valid', issues: [] },
-    { row_number: 3, name: 'Carol Davis', email: 'carol@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', score: '92', instructor: 'Prof. Lee', status: 'valid', issues: [] },
-    { row_number: 4, name: 'David Chen', email: 'david@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', score: '78', instructor: 'Prof. Lee', status: 'valid', issues: [] },
-    { row_number: 5, name: 'Eve Martinez', email: 'invalid-email', course: 'Cloud Architecture', date: '2025-01-25', score: '105', instructor: 'Dr. Patel', status: 'invalid', issues: ['Invalid email format', 'Score exceeds maximum of 100'] },
+    { row_number: 1, name: 'Alice Johnson', email: 'alice@example.com', course: 'Advanced React', date: '2025-01-15', status: 'valid', issues: [] },
+    { row_number: 2, name: 'Bob Williams', email: 'bob@example.com', course: 'Advanced React', date: '2025-01-15', status: 'valid', issues: [] },
+    { row_number: 3, name: 'Carol Davis', email: 'carol@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', status: 'valid', issues: [] },
+    { row_number: 4, name: 'David Chen', email: 'david@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', status: 'valid', issues: [] },
+    { row_number: 5, name: 'Eve Martinez', email: 'invalid-email', course: 'Cloud Architecture', date: '2025-01-25', status: 'invalid', issues: ['Invalid email format'] },
   ],
 }
 
@@ -180,10 +176,10 @@ const SAMPLE_GENERATION: GenerationResult = {
   generated: 4,
   failed: 0,
   certificates: [
-    { participant_name: 'Alice Johnson', email: 'alice@example.com', course: 'Advanced React', date: '2025-01-15', score: '95', instructor: 'Dr. Smith', status: 'generated', certificate_id: 'CERT-AJ-2025-001', error_message: '' },
-    { participant_name: 'Bob Williams', email: 'bob@example.com', course: 'Advanced React', date: '2025-01-15', score: '88', instructor: 'Dr. Smith', status: 'generated', certificate_id: 'CERT-BW-2025-002', error_message: '' },
-    { participant_name: 'Carol Davis', email: 'carol@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', score: '92', instructor: 'Prof. Lee', status: 'generated', certificate_id: 'CERT-CD-2025-003', error_message: '' },
-    { participant_name: 'David Chen', email: 'david@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', score: '78', instructor: 'Prof. Lee', status: 'generated', certificate_id: 'CERT-DC-2025-004', error_message: '' },
+    { participant_name: 'Alice Johnson', email: 'alice@example.com', course: 'Advanced React', date: '2025-01-15', status: 'generated', certificate_id: 'CERT-AJ-2025-001', error_message: '' },
+    { participant_name: 'Bob Williams', email: 'bob@example.com', course: 'Advanced React', date: '2025-01-15', status: 'generated', certificate_id: 'CERT-BW-2025-002', error_message: '' },
+    { participant_name: 'Carol Davis', email: 'carol@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', status: 'generated', certificate_id: 'CERT-CD-2025-003', error_message: '' },
+    { participant_name: 'David Chen', email: 'david@example.com', course: 'Data Science Fundamentals', date: '2025-01-20', status: 'generated', certificate_id: 'CERT-DC-2025-004', error_message: '' },
   ],
 }
 
@@ -200,7 +196,7 @@ const SAMPLE_DISPATCH: DispatchResult = {
 }
 
 // ─── Certificate Field Options ───────────────────────────────────────────────
-const CERTIFICATE_FIELDS = ['Name', 'Email', 'Course', 'Date', 'Score', 'Instructor']
+const CERTIFICATE_FIELDS = ['Name', 'Email', 'Course', 'Date']
 
 // ─── Error Boundary ──────────────────────────────────────────────────────────
 class InlineErrorBoundary extends React.Component<
@@ -341,11 +337,9 @@ function CertificatePreview({ cert }: { cert: CertificateEntry }) {
       <p className="text-lg font-semibold mb-1">{cert?.participant_name ?? 'Participant'}</p>
       <p className="text-sm text-muted-foreground mb-2">{cert?.course ?? 'Course'}</p>
       <Separator className="my-3" />
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>Score: {cert?.score ?? '-'}</span>
+      <div className="flex justify-center text-xs text-muted-foreground">
         <span>{cert?.date ?? '-'}</span>
       </div>
-      <p className="text-xs text-muted-foreground mt-2">Instructor: {cert?.instructor ?? '-'}</p>
       <p className="text-[10px] text-muted-foreground/60 mt-3 font-mono">{cert?.certificate_id ?? ''}</p>
     </div>
   )
@@ -401,7 +395,7 @@ export default function Page() {
 
   // Column mapping
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({
-    Name: '', Email: '', Course: '', Date: '', Score: '', Instructor: '',
+    Name: '', Email: '', Course: '', Date: '',
   })
 
   // Canva template
@@ -574,7 +568,7 @@ export default function Page() {
         template_url: canvaTemplateUrl || 'default-template',
         participants: validRows.map(r => ({
           name: r?.name ?? '', email: r?.email ?? '', course: r?.course ?? '',
-          date: r?.date ?? '', score: r?.score ?? '', instructor: r?.instructor ?? '',
+          date: r?.date ?? '',
         })),
       })
 
@@ -898,7 +892,7 @@ export default function Page() {
                                 <TableHead className="text-xs">Name</TableHead>
                                 <TableHead className="text-xs">Email</TableHead>
                                 <TableHead className="text-xs">Course</TableHead>
-                                <TableHead className="text-xs">Score</TableHead>
+                                <TableHead className="text-xs">Date</TableHead>
                                 <TableHead className="text-xs">Status</TableHead>
                                 <TableHead className="text-xs">Issues</TableHead>
                               </TableRow>
@@ -910,7 +904,7 @@ export default function Page() {
                                   <TableCell className="text-xs font-medium">{row?.name ?? ''}</TableCell>
                                   <TableCell className="text-xs">{row?.email ?? ''}</TableCell>
                                   <TableCell className="text-xs">{row?.course ?? ''}</TableCell>
-                                  <TableCell className="text-xs">{row?.score ?? ''}</TableCell>
+                                  <TableCell className="text-xs">{row?.date ?? ''}</TableCell>
                                   <TableCell><StatusBadge status={row?.status ?? 'unknown'} /></TableCell>
                                   <TableCell className="text-xs text-red-600 max-w-[200px]">
                                     {Array.isArray(row?.issues) && row.issues.length > 0 ? row.issues.join('; ') : '-'}
@@ -1032,7 +1026,7 @@ export default function Page() {
                                 <TableHead className="text-xs">Participant</TableHead>
                                 <TableHead className="text-xs">Email</TableHead>
                                 <TableHead className="text-xs">Course</TableHead>
-                                <TableHead className="text-xs">Score</TableHead>
+                                <TableHead className="text-xs">Date</TableHead>
                                 <TableHead className="text-xs">Certificate ID</TableHead>
                                 <TableHead className="text-xs">Status</TableHead>
                                 <TableHead className="text-xs">Error</TableHead>
@@ -1044,7 +1038,7 @@ export default function Page() {
                                   <TableCell className="text-xs font-medium">{cert?.participant_name ?? ''}</TableCell>
                                   <TableCell className="text-xs">{cert?.email ?? ''}</TableCell>
                                   <TableCell className="text-xs">{cert?.course ?? ''}</TableCell>
-                                  <TableCell className="text-xs">{cert?.score ?? ''}</TableCell>
+                                  <TableCell className="text-xs">{cert?.date ?? ''}</TableCell>
                                   <TableCell className="text-xs font-mono text-muted-foreground">{cert?.certificate_id ?? '-'}</TableCell>
                                   <TableCell><StatusBadge status={cert?.status ?? 'unknown'} /></TableCell>
                                   <TableCell className="text-xs text-red-600 max-w-[200px]">{cert?.error_message || '-'}</TableCell>

@@ -14,8 +14,6 @@
         "email": "string",
         "course": "string",
         "date": "string",
-        "score": "string",
-        "instructor": "string",
         "status": "string",
         "certificate_id": "string",
         "error_message": "string"
