@@ -48,6 +48,8 @@ interface CertificateEntry {
   status: string
   certificate_id: string
   error_message: string
+  pdf_base64?: string
+  filename?: string
 }
 
 interface GenerationResult {
@@ -327,20 +329,53 @@ function TableSkeleton({ rows, cols }: { rows: number; cols: number }) {
 }
 
 // ─── Certificate Preview Card ────────────────────────────────────────────────
-function CertificatePreview({ cert }: { cert: CertificateEntry }) {
+function CertificatePreview({ cert, onDownload }: { cert: CertificateEntry; onDownload?: (cert: CertificateEntry) => void }) {
   return (
-    <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-gradient-to-br from-white to-muted/30">
-      <div className="flex justify-center mb-3">
-        <Award className="w-10 h-10 text-foreground/60" />
+    <div className="relative border border-border rounded-xl overflow-hidden bg-white shadow-md">
+      {/* Certificate visual */}
+      <div className="p-1">
+        <div className="border-2 border-foreground/15 rounded-lg">
+          <div className="border border-foreground/8 rounded-md m-1">
+            {/* Header band */}
+            <div className="bg-foreground text-primary-foreground py-3 px-4 text-center">
+              <p className="text-[10px] font-semibold tracking-[3px] uppercase">Certificate of Completion</p>
+            </div>
+            {/* Body */}
+            <div className="px-6 py-5 text-center space-y-2">
+              <p className="text-[10px] text-muted-foreground">This is to certify that</p>
+              <p className="text-base font-semibold tracking-tight">{cert?.participant_name ?? 'Participant'}</p>
+              <div className="w-16 h-[1.5px] bg-foreground/20 mx-auto" />
+              <p className="text-[10px] text-muted-foreground">has successfully completed</p>
+              <p className="text-sm font-semibold">{cert?.course ?? 'Course'}</p>
+              <p className="text-[10px] text-muted-foreground">Completed on: {cert?.date ?? '-'}</p>
+              {/* Certificate ID box */}
+              <div className="mt-3 bg-muted/50 rounded-md py-2 px-3 inline-block">
+                <p className="text-[9px] text-muted-foreground">Certificate ID</p>
+                <p className="text-[11px] font-mono font-medium">{cert?.certificate_id ?? ''}</p>
+              </div>
+            </div>
+            {/* Footer */}
+            <div className="border-t border-border/50 py-2 text-center">
+              <p className="text-[8px] text-muted-foreground/60">Powered by CertifyFlow</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Certificate of Completion</p>
-      <p className="text-lg font-semibold mb-1">{cert?.participant_name ?? 'Participant'}</p>
-      <p className="text-sm text-muted-foreground mb-2">{cert?.course ?? 'Course'}</p>
-      <Separator className="my-3" />
-      <div className="flex justify-center text-xs text-muted-foreground">
-        <span>{cert?.date ?? '-'}</span>
-      </div>
-      <p className="text-[10px] text-muted-foreground/60 mt-3 font-mono">{cert?.certificate_id ?? ''}</p>
+      {/* Download button overlay */}
+      {cert?.pdf_base64 && onDownload && (
+        <button
+          onClick={() => onDownload(cert)}
+          className="absolute top-2 right-2 p-1.5 bg-foreground text-primary-foreground rounded-md shadow-sm hover:bg-foreground/80 transition-colors"
+          title="Download PDF"
+        >
+          <Download className="w-3.5 h-3.5" />
+        </button>
+      )}
+      {cert?.pdf_base64 && (
+        <div className="absolute bottom-1 right-2">
+          <Badge className="bg-green-100 text-green-800 border-green-200 text-[9px] px-1.5 py-0">PDF Ready</Badge>
+        </div>
+      )}
     </div>
   )
 }
@@ -576,6 +611,43 @@ export default function Page() {
 
       if (result?.success) {
         const parsed = parseAgentResponse<GenerationResult>(result)
+        setGenerationProgress(70)
+
+        // Now generate actual PDFs via our API route
+        const generatedCerts = Array.isArray(parsed?.certificates) ? parsed.certificates.filter(c => c?.status === 'generated') : []
+        if (generatedCerts.length > 0) {
+          try {
+            const pdfRes = await fetch('/api/generate-certificate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                participants: generatedCerts.map(c => ({
+                  name: c.participant_name,
+                  email: c.email,
+                  course: c.course,
+                  date: c.date,
+                  certificate_id: c.certificate_id,
+                })),
+              }),
+            })
+            const pdfData = await pdfRes.json()
+            if (pdfData?.success && Array.isArray(pdfData.certificates)) {
+              // Merge PDF data back into certificates
+              const updatedCerts = parsed.certificates.map(cert => {
+                const pdfMatch = pdfData.certificates.find((p: any) => p.certificate_id === cert.certificate_id || p.email === cert.email)
+                if (pdfMatch) {
+                  return { ...cert, pdf_base64: pdfMatch.pdf_base64, filename: pdfMatch.filename }
+                }
+                return cert
+              })
+              parsed.certificates = updatedCerts
+            }
+          } catch (pdfErr) {
+            // PDF generation failed but certificates were still generated
+            console.error('PDF generation error:', pdfErr)
+          }
+        }
+
         setGenerationResult(parsed)
         setGenerationProgress(100)
       } else {
@@ -591,6 +663,31 @@ export default function Page() {
       setIsGenerating(false)
       setActiveAgentId(null)
     }
+  }
+
+  // ─── Download PDF ──────────────────────────────────────────────────────
+  const downloadPDF = (cert: CertificateEntry) => {
+    if (!cert.pdf_base64) return
+    const byteCharacters = atob(cert.pdf_base64)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    const blob = new Blob([byteArray], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = cert.filename || `Certificate_${cert.participant_name}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const downloadAllPDFs = () => {
+    const certs = Array.isArray(effectiveGeneration?.certificates) ? effectiveGeneration.certificates : []
+    certs.filter(c => c.pdf_base64).forEach((cert, idx) => {
+      setTimeout(() => downloadPDF(cert), idx * 300)
+    })
   }
 
   // ─── Dispatch Agent Call ───────────────────────────────────────────────
@@ -615,10 +712,41 @@ export default function Page() {
           .map(c => ({ name: c?.participant_name ?? '', email: c?.email ?? '', course: c?.course ?? '', date: c?.date ?? '', certificate_id: c?.certificate_id ?? '' }))
       }
 
+      // Build HTML email body for each participant with certificate details
+      const htmlEmailInstruction = `IMPORTANT: For each participant, compose the email as HTML. Use this HTML template for the email body, replacing the placeholders with actual participant data:
+
+<html>
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+<div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+  <div style="background: #1a1a1a; color: white; padding: 24px; text-align: center;">
+    <h1 style="margin: 0; font-size: 20px; letter-spacing: 2px;">CERTIFICATE OF COMPLETION</h1>
+  </div>
+  <div style="padding: 32px; text-align: center;">
+    <p style="color: #666; font-size: 14px; margin-bottom: 8px;">This is to certify that</p>
+    <h2 style="color: #1a1a1a; font-size: 28px; margin: 8px 0; font-weight: 600;">{{name}}</h2>
+    <div style="width: 80px; height: 2px; background: #1a1a1a; margin: 12px auto;"></div>
+    <p style="color: #666; font-size: 14px; margin-bottom: 8px;">has successfully completed the course</p>
+    <h3 style="color: #1a1a1a; font-size: 22px; margin: 8px 0;">{{course}}</h3>
+    <p style="color: #888; font-size: 13px; margin-top: 16px;">Completed on: {{date}}</p>
+    <div style="margin-top: 24px; padding: 16px; background: #f5f5f5; border-radius: 8px; border: 1px solid #eee;">
+      <p style="color: #888; font-size: 11px; margin: 0;">Certificate ID</p>
+      <p style="color: #1a1a1a; font-size: 14px; font-family: monospace; margin: 4px 0 0 0; font-weight: 600;">{{certificate_id}}</p>
+    </div>
+  </div>
+  <div style="background: #fafafa; padding: 16px; text-align: center; border-top: 1px solid #eee;">
+    <p style="color: #999; font-size: 11px; margin: 0;">Powered by CertifyFlow</p>
+  </div>
+</div>
+</body>
+</html>
+
+Replace {{name}}, {{course}}, {{date}}, {{certificate_id}} with the actual values for each participant. Send this HTML as the message_body in GMAIL_SEND_EMAIL.`
+
       const message = JSON.stringify({
         action: 'send_certificates',
         email_subject: emailSubject,
         email_body_template: emailBody,
+        html_email_template_instructions: htmlEmailInstruction,
         participants,
       })
 
@@ -1000,13 +1128,23 @@ export default function Page() {
                   {/* Certificate Preview Cards */}
                   <GlassCard>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-base">Certificate Previews</CardTitle>
-                      <CardDescription className="text-xs">Sample certificates generated from your data</CardDescription>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-base">Certificate Previews</CardTitle>
+                          <CardDescription className="text-xs">Generated PDF certificates -- click to download</CardDescription>
+                        </div>
+                        {certRows.some(c => c.pdf_base64) && (
+                          <Button variant="outline" size="sm" onClick={downloadAllPDFs} className="gap-1 text-xs">
+                            <Download className="w-3 h-3" />
+                            Download All PDFs
+                          </Button>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {certRows.slice(0, 3).map((cert, idx) => (
-                          <CertificatePreview key={idx} cert={cert} />
+                          <CertificatePreview key={idx} cert={cert} onDownload={downloadPDF} />
                         ))}
                       </div>
                     </CardContent>
@@ -1029,6 +1167,7 @@ export default function Page() {
                                 <TableHead className="text-xs">Date</TableHead>
                                 <TableHead className="text-xs">Certificate ID</TableHead>
                                 <TableHead className="text-xs">Status</TableHead>
+                                <TableHead className="text-xs">PDF</TableHead>
                                 <TableHead className="text-xs">Error</TableHead>
                               </TableRow>
                             </TableHeader>
@@ -1041,6 +1180,15 @@ export default function Page() {
                                   <TableCell className="text-xs">{cert?.date ?? ''}</TableCell>
                                   <TableCell className="text-xs font-mono text-muted-foreground">{cert?.certificate_id ?? '-'}</TableCell>
                                   <TableCell><StatusBadge status={cert?.status ?? 'unknown'} /></TableCell>
+                                  <TableCell>
+                                    {cert?.pdf_base64 ? (
+                                      <button onClick={() => downloadPDF(cert)} className="text-xs text-primary hover:underline flex items-center gap-1">
+                                        <Download className="w-3 h-3" /> PDF
+                                      </button>
+                                    ) : (
+                                      <span className="text-xs text-muted-foreground">-</span>
+                                    )}
+                                  </TableCell>
                                   <TableCell className="text-xs text-red-600 max-w-[200px]">{cert?.error_message || '-'}</TableCell>
                                 </TableRow>
                               ))}
