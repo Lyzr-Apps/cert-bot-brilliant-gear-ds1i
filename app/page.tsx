@@ -703,8 +703,6 @@ export default function Page() {
         course: c?.course ?? '',
         date: c?.date ?? '',
         certificate_id: c?.certificate_id ?? '',
-        pdf_base64: c?.pdf_base64 ?? '',
-        pdf_filename: c?.filename ?? `Certificate_${(c?.participant_name ?? 'cert').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
       })
 
       let participants: ReturnType<typeof mapCert>[]
@@ -726,8 +724,7 @@ export default function Page() {
         action: 'send_certificates',
         email_subject: emailSubject,
         email_body_template: emailBody,
-        attachment_instructions: 'CRITICAL: Each participant has a pdf_base64 field containing a base64-encoded PDF certificate and a pdf_filename field. You MUST attach this PDF to the email using the attachment or attachment_content parameter in GMAIL_SEND_EMAIL. The attachment should be the base64 PDF data with the given filename. If GMAIL_SEND_EMAIL does not support direct attachment, include a note in the email body that the certificate PDF is attached.',
-        email_format_instructions: 'Send each email as HTML. The message_body MUST be an HTML email that includes: (1) A greeting with the participant name, (2) A congratulations message about completing the course, (3) A styled certificate details section showing Name, Course, Date, and Certificate ID, (4) A note that the PDF certificate is attached, (5) A closing from CertifyFlow. Use inline CSS for styling. Make it look professional.',
+        email_format_instructions: 'Send each email as HTML using GMAIL_SEND_EMAIL. The message_body MUST be a rich HTML email with inline CSS styling. Include: (1) A professional header banner with "Certificate of Completion" in white text on a dark background, (2) A greeting with the participant name, (3) A congratulations message about completing the course, (4) A visually styled certificate card section with a border showing: participant Name, Course name, Completion Date, and Certificate ID in a clean layout, (5) A note that this email serves as official certification, (6) A professional closing from CertifyFlow. Use inline CSS to make it look like a real certificate in the email. Do NOT attempt to attach any files or PDFs.',
         participants,
       })
 
