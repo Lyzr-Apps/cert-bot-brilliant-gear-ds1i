@@ -697,7 +697,17 @@ export default function Page() {
     setActiveAgentId(EMAIL_DISPATCH_AGENT_ID)
     try {
       const certs = Array.isArray(effectiveGeneration?.certificates) ? effectiveGeneration.certificates : []
-      let participants: { name: string; email: string; course: string; date: string; certificate_id: string }[]
+      const mapCert = (c: CertificateEntry) => ({
+        name: c?.participant_name ?? '',
+        email: c?.email ?? '',
+        course: c?.course ?? '',
+        date: c?.date ?? '',
+        certificate_id: c?.certificate_id ?? '',
+        pdf_base64: c?.pdf_base64 ?? '',
+        pdf_filename: c?.filename ?? `Certificate_${(c?.participant_name ?? 'cert').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+      })
+
+      let participants: ReturnType<typeof mapCert>[]
 
       if (retryOnly && effectiveDispatch) {
         const failedEmails = Array.isArray(effectiveDispatch?.deliveries)
@@ -705,48 +715,19 @@ export default function Page() {
           : []
         participants = certs
           .filter(c => c?.status === 'generated' && failedEmails.includes(c?.email))
-          .map(c => ({ name: c?.participant_name ?? '', email: c?.email ?? '', course: c?.course ?? '', date: c?.date ?? '', certificate_id: c?.certificate_id ?? '' }))
+          .map(mapCert)
       } else {
         participants = certs
           .filter(c => c?.status === 'generated')
-          .map(c => ({ name: c?.participant_name ?? '', email: c?.email ?? '', course: c?.course ?? '', date: c?.date ?? '', certificate_id: c?.certificate_id ?? '' }))
+          .map(mapCert)
       }
-
-      // Build HTML email body for each participant with certificate details
-      const htmlEmailInstruction = `IMPORTANT: For each participant, compose the email as HTML. Use this HTML template for the email body, replacing the placeholders with actual participant data:
-
-<html>
-<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
-<div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-  <div style="background: #1a1a1a; color: white; padding: 24px; text-align: center;">
-    <h1 style="margin: 0; font-size: 20px; letter-spacing: 2px;">CERTIFICATE OF COMPLETION</h1>
-  </div>
-  <div style="padding: 32px; text-align: center;">
-    <p style="color: #666; font-size: 14px; margin-bottom: 8px;">This is to certify that</p>
-    <h2 style="color: #1a1a1a; font-size: 28px; margin: 8px 0; font-weight: 600;">{{name}}</h2>
-    <div style="width: 80px; height: 2px; background: #1a1a1a; margin: 12px auto;"></div>
-    <p style="color: #666; font-size: 14px; margin-bottom: 8px;">has successfully completed the course</p>
-    <h3 style="color: #1a1a1a; font-size: 22px; margin: 8px 0;">{{course}}</h3>
-    <p style="color: #888; font-size: 13px; margin-top: 16px;">Completed on: {{date}}</p>
-    <div style="margin-top: 24px; padding: 16px; background: #f5f5f5; border-radius: 8px; border: 1px solid #eee;">
-      <p style="color: #888; font-size: 11px; margin: 0;">Certificate ID</p>
-      <p style="color: #1a1a1a; font-size: 14px; font-family: monospace; margin: 4px 0 0 0; font-weight: 600;">{{certificate_id}}</p>
-    </div>
-  </div>
-  <div style="background: #fafafa; padding: 16px; text-align: center; border-top: 1px solid #eee;">
-    <p style="color: #999; font-size: 11px; margin: 0;">Powered by CertifyFlow</p>
-  </div>
-</div>
-</body>
-</html>
-
-Replace {{name}}, {{course}}, {{date}}, {{certificate_id}} with the actual values for each participant. Send this HTML as the message_body in GMAIL_SEND_EMAIL.`
 
       const message = JSON.stringify({
         action: 'send_certificates',
         email_subject: emailSubject,
         email_body_template: emailBody,
-        html_email_template_instructions: htmlEmailInstruction,
+        attachment_instructions: 'CRITICAL: Each participant has a pdf_base64 field containing a base64-encoded PDF certificate and a pdf_filename field. You MUST attach this PDF to the email using the attachment or attachment_content parameter in GMAIL_SEND_EMAIL. The attachment should be the base64 PDF data with the given filename. If GMAIL_SEND_EMAIL does not support direct attachment, include a note in the email body that the certificate PDF is attached.',
+        email_format_instructions: 'Send each email as HTML. The message_body MUST be an HTML email that includes: (1) A greeting with the participant name, (2) A congratulations message about completing the course, (3) A styled certificate details section showing Name, Course, Date, and Certificate ID, (4) A note that the PDF certificate is attached, (5) A closing from CertifyFlow. Use inline CSS for styling. Make it look professional.',
         participants,
       })
 
