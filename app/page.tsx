@@ -415,8 +415,8 @@ export default function Page() {
   const [generationProgress, setGenerationProgress] = useState(0)
 
   // Email template
-  const [emailSubject, setEmailSubject] = useState('Your {{course}} Certificate is Ready')
-  const [emailBody, setEmailBody] = useState('Dear {{name}},\n\nCongratulations! Your certificate for {{course}} has been generated.\n\nCertificate ID: {{certificate_id}}\n\nBest regards,\nCertifyFlow')
+  const [emailSubject, setEmailSubject] = useState('Your {{course}} Certificate of Completion')
+  const [emailBody, setEmailBody] = useState('Dear {{name}},\n\nCongratulations on completing {{course}}!\n\nHere are your certificate details:\n\n-------------------------------\nCERTIFICATE OF COMPLETION\n-------------------------------\nRecipient: {{name}}\nCourse: {{course}}\nDate: {{date}}\nCertificate ID: {{certificate_id}}\n-------------------------------\n\nPlease keep this email for your records. Your Certificate ID can be used for verification purposes.\n\nBest regards,\nCertifyFlow')
 
   // Errors
   const [errorMessage, setErrorMessage] = useState('')
@@ -600,7 +600,7 @@ export default function Page() {
     setActiveAgentId(EMAIL_DISPATCH_AGENT_ID)
     try {
       const certs = Array.isArray(effectiveGeneration?.certificates) ? effectiveGeneration.certificates : []
-      let participants: { name: string; email: string; course: string; certificate_id: string }[]
+      let participants: { name: string; email: string; course: string; date: string; certificate_id: string }[]
 
       if (retryOnly && effectiveDispatch) {
         const failedEmails = Array.isArray(effectiveDispatch?.deliveries)
@@ -608,11 +608,11 @@ export default function Page() {
           : []
         participants = certs
           .filter(c => c?.status === 'generated' && failedEmails.includes(c?.email))
-          .map(c => ({ name: c?.participant_name ?? '', email: c?.email ?? '', course: c?.course ?? '', certificate_id: c?.certificate_id ?? '' }))
+          .map(c => ({ name: c?.participant_name ?? '', email: c?.email ?? '', course: c?.course ?? '', date: c?.date ?? '', certificate_id: c?.certificate_id ?? '' }))
       } else {
         participants = certs
           .filter(c => c?.status === 'generated')
-          .map(c => ({ name: c?.participant_name ?? '', email: c?.email ?? '', course: c?.course ?? '', certificate_id: c?.certificate_id ?? '' }))
+          .map(c => ({ name: c?.participant_name ?? '', email: c?.email ?? '', course: c?.course ?? '', date: c?.date ?? '', certificate_id: c?.certificate_id ?? '' }))
       }
 
       const message = JSON.stringify({
@@ -1102,7 +1102,7 @@ export default function Page() {
                     <Mail className="w-4 h-4" />
                     Email Template
                   </CardTitle>
-                  <CardDescription className="text-xs">Configure the email content for certificate delivery. Use placeholders: {'{{name}}'}, {'{{course}}'}, {'{{certificate_id}}'}</CardDescription>
+                  <CardDescription className="text-xs">Configure the email content for certificate delivery. Use placeholders: {'{{name}}'}, {'{{course}}'}, {'{{date}}'}, {'{{certificate_id}}'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -1127,6 +1127,7 @@ export default function Page() {
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline" className="text-xs font-mono">{'{{name}}'}</Badge>
                     <Badge variant="outline" className="text-xs font-mono">{'{{course}}'}</Badge>
+                    <Badge variant="outline" className="text-xs font-mono">{'{{date}}'}</Badge>
                     <Badge variant="outline" className="text-xs font-mono">{'{{certificate_id}}'}</Badge>
                   </div>
                 </CardContent>
