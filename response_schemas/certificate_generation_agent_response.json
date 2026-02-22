@@ -1,0 +1,52 @@
+{
+  "agent_name": "Certificate Generation Agent",
+  "agent_id": "699ad39b06cd1ed2fd6cb5a0",
+  "description": "Takes validated participant data and Canva template reference, maps Excel fields (name, course name, date, score, instructor) onto certificate template placeholders, generates personalized certificates, exports each as PDF, and returns generation status per participant.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "total": "number",
+    "generated": "number",
+    "failed": "number",
+    "certificates": [
+      {
+        "participant_name": "string",
+        "email": "string",
+        "course": "string",
+        "date": "string",
+        "score": "string",
+        "instructor": "string",
+        "status": "string",
+        "certificate_id": "string",
+        "error_message": "string"
+      }
+    ]
+  },
+  "example_response": {
+    "total": 0,
+    "generated": 0,
+    "failed": 0,
+    "certificates": [
+      {
+        "participant_name": "sample string",
+        "email": "sample string",
+        "course": "sample string",
+        "date": "sample string",
+        "score": "sample string",
+        "instructor": "sample string",
+        "status": "sample string",
+        "certificate_id": "sample string",
+        "error_message": "sample string"
+      }
+    ]
+  },
+  "has_module_outputs": true,
+  "module_outputs_example": {
+    "artifact_files": [
+      {
+        "file_url": "https://example.com/file.pdf"
+      }
+    ]
+  }
+}

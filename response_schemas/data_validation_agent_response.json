@@ -1,0 +1,48 @@
+{
+  "agent_name": "Data Validation Agent",
+  "agent_id": "699ad39b085cc6c072ca8fc7",
+  "description": "Reads uploaded Excel file data, validates each row for completeness (name, course, date, email are present), checks email format validity, flags missing/malformed fields, and returns a structured validation report with row-by-row status.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "total_rows": "number",
+    "valid_count": "number",
+    "invalid_count": "number",
+    "rows": [
+      {
+        "row_number": "number",
+        "name": "string",
+        "email": "string",
+        "course": "string",
+        "date": "string",
+        "score": "string",
+        "instructor": "string",
+        "status": "string",
+        "issues": [
+          "string"
+        ]
+      }
+    ]
+  },
+  "example_response": {
+    "total_rows": 0,
+    "valid_count": 0,
+    "invalid_count": 0,
+    "rows": [
+      {
+        "row_number": 0,
+        "name": "sample string",
+        "email": "sample string",
+        "course": "sample string",
+        "date": "sample string",
+        "score": "sample string",
+        "instructor": "sample string",
+        "status": "sample string",
+        "issues": [
+          "sample string"
+        ]
+      }
+    ]
+  }
+}

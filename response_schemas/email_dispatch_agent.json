@@ -1,0 +1,22 @@
+{
+  "agent_name": "Email Dispatch Agent",
+  "agent_id": "699ad3aef71d07b7b0d9e82d",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": false,
+  "response_schema": {
+    "total_sent": "number",
+    "total_failed": "number",
+    "total_retried": "number",
+    "deliveries": [
+      {
+        "participant_name": "string",
+        "email": "string",
+        "status": "string",
+        "attempts": "number",
+        "timestamp": "string",
+        "error_message": "string"
+      }
+    ]
+  }
+}

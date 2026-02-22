@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": "input_node",
+      "type": "Input",
+      "label": "User Upload (Excel + Canva Template)",
+      "nodeCategory": "input"
+    },
+    {
+      "id": "data_validation_agent",
+      "type": "Agent",
+      "label": "Data Validation Agent",
+      "nodeCategory": "agent"
+    },
+    {
+      "id": "certificate_generation_agent",
+      "type": "Agent",
+      "label": "Certificate Generation Agent",
+      "nodeCategory": "agent"
+    },
+    {
+      "id": "email_dispatch_agent",
+      "type": "Agent",
+      "label": "Email Dispatch Agent",
+      "nodeCategory": "agent"
+    }
+  ],
+  "edges": [
+    {
+      "source": "input_node",
+      "target": "data_validation_agent"
+    },
+    {
+      "source": "data_validation_agent",
+      "target": "certificate_generation_agent"
+    },
+    {
+      "source": "certificate_generation_agent",
+      "target": "email_dispatch_agent"
+    }
+  ]
+}

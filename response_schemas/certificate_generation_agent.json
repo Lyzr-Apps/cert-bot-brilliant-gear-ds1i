@@ -1,0 +1,25 @@
+{
+  "agent_name": "Certificate Generation Agent",
+  "agent_id": "699ad39b06cd1ed2fd6cb5a0",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": false,
+  "response_schema": {
+    "total": "number",
+    "generated": "number",
+    "failed": "number",
+    "certificates": [
+      {
+        "participant_name": "string",
+        "email": "string",
+        "course": "string",
+        "date": "string",
+        "score": "string",
+        "instructor": "string",
+        "status": "string",
+        "certificate_id": "string",
+        "error_message": "string"
+      }
+    ]
+  }
+}

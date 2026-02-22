@@ -1,0 +1,52 @@
+{
+  "agents": [
+    {
+      "node_id": "data_validation_agent",
+      "agent_name": "Data Validation Agent",
+      "agent_id": "699ad39b085cc6c072ca8fc7",
+      "agent_type": "json",
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.2,
+      "top_p": 1,
+      "tools": [],
+      "has_image_output": false,
+      "has_voice": false,
+      "has_file_output": false
+    },
+    {
+      "node_id": "certificate_generation_agent",
+      "agent_name": "Certificate Generation Agent",
+      "agent_id": "699ad39b06cd1ed2fd6cb5a0",
+      "agent_type": "json",
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.3,
+      "top_p": 1,
+      "tools": [],
+      "has_image_output": false,
+      "has_voice": false,
+      "has_file_output": false
+    },
+    {
+      "node_id": "email_dispatch_agent",
+      "agent_name": "Email Dispatch Agent",
+      "agent_id": "699ad3aef71d07b7b0d9e82d",
+      "agent_type": "json",
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.2,
+      "top_p": 1,
+      "tools": [
+        {
+          "tool_name": "gmail",
+          "tool_source": "composio",
+          "action_names": ["GMAIL_SEND_EMAIL"]
+        }
+      ],
+      "has_image_output": false,
+      "has_voice": false,
+      "has_file_output": false
+    }
+  ]
+}

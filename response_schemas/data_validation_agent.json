@@ -1,0 +1,25 @@
+{
+  "agent_name": "Data Validation Agent",
+  "agent_id": "699ad39b085cc6c072ca8fc7",
+  "agent_type": "json",
+  "accessor": "json",
+  "has_module_outputs": false,
+  "response_schema": {
+    "total_rows": "number",
+    "valid_count": "number",
+    "invalid_count": "number",
+    "rows": [
+      {
+        "row_number": "number",
+        "name": "string",
+        "email": "string",
+        "course": "string",
+        "date": "string",
+        "score": "string",
+        "instructor": "string",
+        "status": "string",
+        "issues": ["string"]
+      }
+    ]
+  }
+}

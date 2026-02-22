@@ -1,0 +1,38 @@
+{
+  "agent_name": "Email Dispatch Agent",
+  "agent_id": "699ad3aef71d07b7b0d9e82d",
+  "description": "Sends generated PDF certificates to each participant's email address extracted from the Excel data, includes personalized email body, handles automatic retry on failure (up to 3 attempts), and logs delivery status (sent/failed/retried) for each participant.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "total_sent": "number",
+    "total_failed": "number",
+    "total_retried": "number",
+    "deliveries": [
+      {
+        "participant_name": "string",
+        "email": "string",
+        "status": "string",
+        "attempts": "number",
+        "timestamp": "string",
+        "error_message": "string"
+      }
+    ]
+  },
+  "example_response": {
+    "total_sent": 0,
+    "total_failed": 0,
+    "total_retried": 0,
+    "deliveries": [
+      {
+        "participant_name": "sample string",
+        "email": "sample string",
+        "status": "sample string",
+        "attempts": 0,
+        "timestamp": "sample string",
+        "error_message": "sample string"
+      }
+    ]
+  }
+}
